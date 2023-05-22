@@ -1,10 +1,10 @@
 package com.example.tamagochi;
 
 import java.io.IOException;
-
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -14,32 +14,37 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class App extends Application {
 
+    private ListView<Consomable> boutiqueListView;
+    private ObservableList<Consomable> boutiqueItems;
     private ListView<String> taskListView;
     private ObservableList<String> tasks;
-    private int points = 0;
+    private int points;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        boutiqueItems = FXCollections.observableArrayList();
+        boutiqueListView = new ListView<>();
+        boutiqueListView.setItems(boutiqueItems);
 
-        // Initialize task list with sample tasks
-        tasks = FXCollections.observableArrayList("Buy groceries", "Go to the gym", "Call mom");
+        boutiqueItems.add(new Consomable("Potion de soin", 10.0));
+        boutiqueItems.add(new Consomable("Gateau de force", 15.0));
+        boutiqueItems.add(new Consomable("elexir de bonheur", 15.0));
+        boutiqueItems.add(new Consomable("boisson de joie", 5.0));
 
-        // Create list view to display tasks
+        tasks = FXCollections.observableArrayList("Manger", "Acheter un item", "Consommer un item");
+
         taskListView = new ListView<>(tasks);
         taskListView.setPrefWidth(300);
 
-        // Create text field for adding new tasks
         TextField taskField = new TextField();
-        taskField.setPromptText("Add new task");
+        taskField.setPromptText("Ajouter une nouvelle tâche");
         taskField.setPrefWidth(200);
 
-        // Create button for adding new tasks
-        Button addButton = new Button("Add");
+        Button addButton = new Button("Ajouter");
         addButton.setOnAction(event -> {
             String task = taskField.getText().trim();
             if (!task.isEmpty()) {
@@ -48,77 +53,109 @@ public class App extends Application {
             }
         });
 
-        // Create button for editing selected task
-        Button editButton = new Button("Edit");
+        Button editButton = new Button("Éditer");
         editButton.setOnAction(event -> {
-            int selectedIndex = taskListView.getSelectionModel().getSelectedIndex();
-            if (selectedIndex >= 0) {
+            int index = taskListView.getSelectionModel().getSelectedIndex();
+            if (index >= 0) {
                 String newTask = taskField.getText().trim();
                 if (!newTask.isEmpty()) {
-                    tasks.set(selectedIndex, newTask);
+                    tasks.set(index, newTask);
                     taskField.clear();
                 }
             }
         });
 
-        // Create button for deleting selected task
-        Button deleteButton = new Button("Delete");
+        Button deleteButton = new Button("Supprimer");
         deleteButton.setOnAction(event -> {
-            int selectedIndex = taskListView.getSelectionModel().getSelectedIndex();
-            if (selectedIndex >= 0) {
-                tasks.remove(selectedIndex);
+            int index = taskListView.getSelectionModel().getSelectedIndex();
+            if (index >= 0) {
+                tasks.remove(index);
             }
         });
+
+        Label pointderecompense = new Label();
 
         Button validateButton = new Button("Valider");
         validateButton.setOnAction(event -> {
-            int selectedIndex = taskListView.getSelectionModel().getSelectedIndex();
-            if (selectedIndex >= 0) {
-                tasks.remove(selectedIndex);
+            int index = taskListView.getSelectionModel().getSelectedIndex();
+            if (index >= 0) {
+                tasks.remove(index);
 
                 points++;
-
+                pointderecompense.setText("Argent : " + points);
+                System.out.print(points);
             }
         });
 
-        //
-        String message = ("Points: " + points);
-        Label messageLabel = new Label();
-        messageLabel.setText(message);
+        Button shopButton = new Button("Boutique");
+        Button inventaireButton = new Button("Inventaire");
+        Button toDoListButton = new Button("Liste de tâches");
 
-        VBox textBox = new VBox();
-        textBox.getChildren().addAll(messageLabel);
+        VBox menuChoix = new VBox(10);
+        menuChoix.getChildren().addAll(shopButton, inventaireButton, toDoListButton);
+        menuChoix.setAlignment(Pos.CENTER);
 
-        // Create input box for task field and associated buttons
+        Scene menu = new Scene(menuChoix, 400, 400);
+
+        Button retourMenuButton = new Button("Retour au menu");
+        retourMenuButton.setOnAction(event -> {
+            primaryStage.setScene(menu);
+        });
+
+        VBox containerShop = new VBox(10);
+        containerShop.getChildren().addAll(boutiqueListView, retourMenuButton);
+
         HBox inputBox = new HBox(10);
         inputBox.getChildren().addAll(taskField, addButton, editButton, deleteButton, validateButton);
 
-        // Create container for list view and input box
-        VBox container = new VBox(10);
-        container.getChildren().addAll(taskListView, inputBox, textBox);
-        container.setAlignment(Pos.CENTER);
+        VBox containerListTasks = new VBox(10);
+        containerListTasks.getChildren().addAll(taskListView, inputBox, pointderecompense, retourMenuButton);
+        containerListTasks.setAlignment(Pos.CENTER);
 
-        // Create scene for to-do list
-        Scene scene = new Scene(container, 400, 400);
+        Parent shopRoot = loadFXML("shop");
+        Scene shop = new Scene(shopRoot, 400, 400);
+        ((VBox) shopRoot).getChildren().add(containerShop);
 
-        // Set title and show primary stage
-        primaryStage.setTitle("To-Do List");
-        primaryStage.setScene(scene);
+        Parent inventoryRoot = loadFXML("inventory");
+        Scene inventory = new Scene(inventoryRoot, 400, 400);
+        ((VBox) inventoryRoot).getChildren().add(retourMenuButton);
+
+        Parent todoRoot = loadFXML("toDoList");
+        Scene toDoList = new Scene(todoRoot, 400, 400);
+        ((VBox) todoRoot).getChildren().add(containerListTasks);
+
+        primaryStage.setTitle("TamaGochi");
+        primaryStage.setScene(menu);
         primaryStage.show();
 
-    }
+        shopButton.setOnAction(event -> {
+            primaryStage.setScene(shop);
+        });
 
-    // private static Parent loadFXML(String fxml) throws IOException {
-    // FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml +
-    // ".fxml"));
-    // return fxmlLoader.load();
-    // }
+        inventaireButton.setOnAction(event -> {
+            primaryStage.setScene(inventory);
+        });
+
+        toDoListButton.setOnAction(event -> {
+            // App.setRoot("toDoList");
+            primaryStage.setScene(toDoList);
+        });
+
+        retourMenuButton.setOnAction(event -> {
+            primaryStage.setScene(menu);
+        });
+
+    }
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    public static void setRoot(String string) {
+    private static Parent loadFXML(String fxml) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        return fxmlLoader.load();
     }
 
+    public static void setRoot(String string) {
+    }
 }
