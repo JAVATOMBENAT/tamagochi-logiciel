@@ -23,6 +23,7 @@ public class App extends Application {
     private ListView<String> taskListView;
     private ObservableList<String> tasks;
     private int points;
+    private static Scene menuScene;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -73,7 +74,7 @@ public class App extends Application {
             }
         });
 
-        Label pointderecompense = new Label();
+        Label pointDeRecompense = new Label();
 
         Button validateButton = new Button("Valider");
         validateButton.setOnAction(event -> {
@@ -82,7 +83,7 @@ public class App extends Application {
                 tasks.remove(index);
 
                 points++;
-                pointderecompense.setText("Argent : " + points);
+                pointDeRecompense.setText("Argent : " + points);
                 System.out.print(points);
             }
         });
@@ -95,11 +96,19 @@ public class App extends Application {
         menuChoix.getChildren().addAll(shopButton, inventaireButton, toDoListButton);
         menuChoix.setAlignment(Pos.CENTER);
 
-        Scene menu = new Scene(menuChoix, 400, 400);
+        menuScene = new Scene(menuChoix, 400, 400);
 
         Button retourMenuButton = new Button("Retour au menu");
         retourMenuButton.setOnAction(event -> {
-            primaryStage.setScene(menu);
+            primaryStage.setScene(menuScene);
+        });
+        Button retourMenuButtonInventory = new Button("Retour au menu");
+        retourMenuButtonInventory.setOnAction(event -> {
+            primaryStage.setScene(menuScene);
+        });
+        Button retourMenuButtonToDo = new Button("Retour au menu");
+        retourMenuButtonToDo.setOnAction(event -> {
+            primaryStage.setScene(menuScene);
         });
 
         VBox containerShop = new VBox(10);
@@ -109,23 +118,23 @@ public class App extends Application {
         inputBox.getChildren().addAll(taskField, addButton, editButton, deleteButton, validateButton);
 
         VBox containerListTasks = new VBox(10);
-        containerListTasks.getChildren().addAll(taskListView, inputBox, pointderecompense, retourMenuButton);
+        containerListTasks.getChildren().addAll(taskListView, inputBox, pointDeRecompense);
         containerListTasks.setAlignment(Pos.CENTER);
 
         Parent shopRoot = loadFXML("shop");
         Scene shop = new Scene(shopRoot, 400, 400);
-        ((VBox) shopRoot).getChildren().add(containerShop);
+        ((VBox) shopRoot).getChildren().addAll(containerShop);
 
         Parent inventoryRoot = loadFXML("inventory");
         Scene inventory = new Scene(inventoryRoot, 400, 400);
-        ((VBox) inventoryRoot).getChildren().add(retourMenuButton);
+        ((VBox) inventoryRoot).getChildren().addAll(containerListTasks, retourMenuButtonInventory);
 
         Parent todoRoot = loadFXML("toDoList");
         Scene toDoList = new Scene(todoRoot, 400, 400);
-        ((VBox) todoRoot).getChildren().add(containerListTasks);
+        ((VBox) todoRoot).getChildren().addAll(containerListTasks, retourMenuButtonToDo);
 
         primaryStage.setTitle("TamaGochi");
-        primaryStage.setScene(menu);
+        primaryStage.setScene(menuScene);
         primaryStage.show();
 
         shopButton.setOnAction(event -> {
@@ -137,14 +146,11 @@ public class App extends Application {
         });
 
         toDoListButton.setOnAction(event -> {
-            // App.setRoot("toDoList");
             primaryStage.setScene(toDoList);
         });
-
-        retourMenuButton.setOnAction(event -> {
-            primaryStage.setScene(menu);
-        });
-
+        // retourMenuButton.setOnAction(event -> {
+        // primaryStage.setScene(menuScene);
+        // });
     }
 
     public static void main(String[] args) {
@@ -154,6 +160,10 @@ public class App extends Application {
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
+    }
+
+    public static Scene getMenuScene() {
+        return menuScene;
     }
 
     public static void setRoot(String string) {

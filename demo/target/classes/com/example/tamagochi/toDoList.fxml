@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
-
-
 <VBox xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.tamagochi.PrimaryController">
-    <!-- <ListView fx:id="taskListView" prefWidth="300" />
-    <VBox spacing="10">
-        <TextField fx:id="taskField" promptText="Ajouter une nouvelle tâche" prefWidth="200" />
-        <Button text="Ajouter" onAction="#addTask" />
-        <Button text="Éditer" onAction="#editTask" />
-        <Button text="Supprimer" onAction="#deleteTask" />
-        <Button text="Valider" onAction="#validateTask" />
-    </VBox>
-    <Label fx:id="pointderecompense" />
-    <Button text="Retour au menu" onAction="#returnToMenu" /> -->
+   
 </VBox>
