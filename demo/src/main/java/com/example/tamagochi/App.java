@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -24,17 +25,20 @@ public class App extends Application {
     private ObservableList<String> tasks;
     private int points;
     private static Scene menuScene;
+    private ListView<Consomable> inventaireListView;
+    private ObservableList<Consomable> inventaireItems;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        inventaireItems = FXCollections.observableArrayList();
         boutiqueItems = FXCollections.observableArrayList();
         boutiqueListView = new ListView<>();
         boutiqueListView.setItems(boutiqueItems);
 
         boutiqueItems.add(new Consomable("Potion de soin", 10.0));
         boutiqueItems.add(new Consomable("Gateau de force", 15.0));
-        boutiqueItems.add(new Consomable("elexir de bonheur", 15.0));
-        boutiqueItems.add(new Consomable("boisson de joie", 5.0));
+        boutiqueItems.add(new Consomable("Elixir de bonheur", 15.0));
+        boutiqueItems.add(new Consomable("Boisson de joie", 5.0));
 
         tasks = FXCollections.observableArrayList("Manger", "Acheter un item", "Consommer un item");
 
@@ -82,7 +86,7 @@ public class App extends Application {
             if (index >= 0) {
                 tasks.remove(index);
 
-                points++;
+                points+= 10;
                 pointDeRecompense.setText("Argent : " + points);
                 System.out.print(points);
             }
@@ -113,6 +117,35 @@ public class App extends Application {
 
         VBox containerShop = new VBox(10);
         containerShop.getChildren().addAll(boutiqueListView, retourMenuButton);
+        for (Consomable consomable : boutiqueItems) {
+            HBox ligneShop = new HBox(10);
+            Button acheterButton = new Button("Acheter");
+            acheterButton.setOnAction(event -> {
+                // Ajoute le consommable à l'inventaire
+                inventaireItems.add(consomable);
+                // Déduit le prix du consommable des points
+                points -= consomable.getPrix();
+                pointDeRecompense.setText("Argent : " + points);
+            });
+            ligneShop.getChildren().addAll(new Label(consomable.getNom()),
+                    new Label(String.valueOf(consomable.getPrix())), acheterButton);
+            containerShop.getChildren().add(ligneShop);
+        }
+
+        inventaireListView = new ListView<>();
+        inventaireListView.setItems(inventaireItems);
+
+        VBox containerInventaire = new VBox(10);
+        containerInventaire.getChildren().addAll(inventaireListView, retourMenuButtonInventory);
+        for (Consomable consomable : inventaireItems) {
+            HBox ligneInventaire = new HBox(10);
+            Button consommerButton = new Button("Consommer");
+            consommerButton.setOnAction(event -> {
+                inventaireItems.remove(consomable); // Supprime l'élément de l'inventaire
+            });
+            ligneInventaire.getChildren().addAll(new Label(consomable.getNom()), consommerButton);
+            containerInventaire.getChildren().add(ligneInventaire);
+        }
 
         HBox inputBox = new HBox(10);
         inputBox.getChildren().addAll(taskField, addButton, editButton, deleteButton, validateButton);
@@ -127,7 +160,7 @@ public class App extends Application {
 
         Parent inventoryRoot = loadFXML("inventory");
         Scene inventory = new Scene(inventoryRoot, 400, 400);
-        ((VBox) inventoryRoot).getChildren().addAll(containerListTasks, retourMenuButtonInventory);
+        ((VBox) inventoryRoot).getChildren().addAll(containerInventaire, retourMenuButtonInventory);
 
         Parent todoRoot = loadFXML("toDoList");
         Scene toDoList = new Scene(todoRoot, 400, 400);
@@ -148,9 +181,6 @@ public class App extends Application {
         toDoListButton.setOnAction(event -> {
             primaryStage.setScene(toDoList);
         });
-        // retourMenuButton.setOnAction(event -> {
-        // primaryStage.setScene(menuScene);
-        // });
     }
 
     public static void main(String[] args) {

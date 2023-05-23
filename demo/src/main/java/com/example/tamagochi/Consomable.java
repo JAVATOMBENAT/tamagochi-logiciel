@@ -18,6 +18,6 @@ public class Consomable {
     }
 
     public String toString() {
-        return this.nom + "prix : " + this.prix;
+        return this.nom + "prix :  " + this.prix + "€";
     }
 }
