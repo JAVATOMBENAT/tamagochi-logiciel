@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -76,7 +77,12 @@ public class App extends Application {
             }
         });
 
-        Label pointDeRecompense = new Label();
+        Label pointDeRecompense = new Label("argent :  0 €");
+        Label pointDeRecompenseshop = new Label("argent :  0 €");
+        Label pointDeRecompenseinventory = new Label("argent :  0 €");
+        pointDeRecompense.setText("Argent : " + pointDeRecompense);
+        pointDeRecompenseshop.setText("Argent : " + points);
+        pointDeRecompenseinventory.setText("Argent : " + points);
 
         Button validateButton = new Button("Valider");
         validateButton.setOnAction(event -> {
@@ -114,7 +120,7 @@ public class App extends Application {
         });
 
         VBox containerShop = new VBox(10);
-        containerShop.getChildren().addAll(boutiqueListView, retourMenuButton);
+        containerShop.getChildren().addAll(boutiqueListView, retourMenuButton, pointDeRecompenseshop);
 
         boutiqueListView.setCellFactory(param -> new ListCell<>() {
             private final Button acheterButton = new Button("Acheter");
@@ -122,9 +128,18 @@ public class App extends Application {
             {
                 acheterButton.setOnAction(event -> {
                     Consomable consomable = getItem();
-                    inventaireItems.add(consomable); // Ajoute le consommable à l'inventaire
-                    points -= consomable.getPrix(); // Déduit le prix du consommable des points
-                    pointDeRecompense.setText("Argent : " + points);
+                    if (points >= consomable.getPrix()) {
+                        inventaireItems.add(consomable); // Ajoute le consommable à l'inventaire
+                        points -= consomable.getPrix(); // Déduit le prix du consommable des points
+                        pointDeRecompense.setText("Argent : " + points);
+                    } else {
+                        // Display an error message if the user doesn't have enough money
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Erreur");
+                        alert.setHeaderText("Fonds insuffisants");
+                        alert.setContentText("Vous n'avez pas assez d'argent pour acheter cet objet.");
+                        alert.showAndWait();
+                    }
                 });
             }
 
@@ -146,7 +161,8 @@ public class App extends Application {
         ListView<Consomable> inventaireListView = new ListView<>(inventaireItems);
 
         VBox containerInventaire = new VBox(10);
-        containerInventaire.getChildren().addAll(inventaireListView, retourMenuButtonInventory);
+        containerInventaire.getChildren().addAll(inventaireListView, retourMenuButtonInventory,
+                pointDeRecompenseinventory);
 
         inventaireListView.setCellFactory(param -> new ListCell<>() {
             private final Button consommerButton = new Button("Consommer");

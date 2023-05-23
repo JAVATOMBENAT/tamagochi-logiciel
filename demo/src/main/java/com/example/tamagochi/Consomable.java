@@ -14,7 +14,7 @@ public class Consomable {
     }
 
     public double getPrix() {
-        return prix;
+        return prix ;
     }
 
     public String toString() {
