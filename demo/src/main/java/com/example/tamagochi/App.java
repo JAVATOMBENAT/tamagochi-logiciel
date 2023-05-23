@@ -1,39 +1,37 @@
 package com.example.tamagochi;
 
-import java.io.IOException;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 public class App extends Application {
 
-    private ListView<Consomable> boutiqueListView;
     private ObservableList<Consomable> boutiqueItems;
-    private ListView<String> taskListView;
     private ObservableList<String> tasks;
     private int points;
     private static Scene menuScene;
-    private ListView<Consomable> inventaireListView;
     private ObservableList<Consomable> inventaireItems;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         inventaireItems = FXCollections.observableArrayList();
         boutiqueItems = FXCollections.observableArrayList();
-        boutiqueListView = new ListView<>();
-        boutiqueListView.setItems(boutiqueItems);
+        ListView<Consomable> boutiqueListView = new ListView<>(boutiqueItems);
 
         boutiqueItems.add(new Consomable("Potion de soin", 10.0));
         boutiqueItems.add(new Consomable("Gateau de force", 15.0));
@@ -42,7 +40,7 @@ public class App extends Application {
 
         tasks = FXCollections.observableArrayList("Manger", "Acheter un item", "Consommer un item");
 
-        taskListView = new ListView<>(tasks);
+        ListView<String> taskListView = new ListView<>(tasks);
         taskListView.setPrefWidth(300);
 
         TextField taskField = new TextField();
@@ -86,7 +84,7 @@ public class App extends Application {
             if (index >= 0) {
                 tasks.remove(index);
 
-                points+= 10;
+                points += 10;
                 pointDeRecompense.setText("Argent : " + points);
                 System.out.print(points);
             }
@@ -117,35 +115,62 @@ public class App extends Application {
 
         VBox containerShop = new VBox(10);
         containerShop.getChildren().addAll(boutiqueListView, retourMenuButton);
-        for (Consomable consomable : boutiqueItems) {
-            HBox ligneShop = new HBox(10);
-            Button acheterButton = new Button("Acheter");
-            acheterButton.setOnAction(event -> {
-                // Ajoute le consommable à l'inventaire
-                inventaireItems.add(consomable);
-                // Déduit le prix du consommable des points
-                points -= consomable.getPrix();
-                pointDeRecompense.setText("Argent : " + points);
-            });
-            ligneShop.getChildren().addAll(new Label(consomable.getNom()),
-                    new Label(String.valueOf(consomable.getPrix())), acheterButton);
-            containerShop.getChildren().add(ligneShop);
-        }
 
-        inventaireListView = new ListView<>();
-        inventaireListView.setItems(inventaireItems);
+        boutiqueListView.setCellFactory(param -> new ListCell<>() {
+            private final Button acheterButton = new Button("Acheter");
+
+            {
+                acheterButton.setOnAction(event -> {
+                    Consomable consomable = getItem();
+                    inventaireItems.add(consomable); // Ajoute le consommable à l'inventaire
+                    points -= consomable.getPrix(); // Déduit le prix du consommable des points
+                    pointDeRecompense.setText("Argent : " + points);
+                });
+            }
+
+            @Override
+            protected void updateItem(Consomable item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    HBox ligneShop = new HBox(10);
+                    ligneShop.getChildren().addAll(new Label(item.getNom()),
+                            new Label(String.valueOf(item.getPrix())), acheterButton);
+                    setGraphic(ligneShop);
+                }
+            }
+        });
+
+        ListView<Consomable> inventaireListView = new ListView<>(inventaireItems);
 
         VBox containerInventaire = new VBox(10);
         containerInventaire.getChildren().addAll(inventaireListView, retourMenuButtonInventory);
-        for (Consomable consomable : inventaireItems) {
-            HBox ligneInventaire = new HBox(10);
-            Button consommerButton = new Button("Consommer");
-            consommerButton.setOnAction(event -> {
-                inventaireItems.remove(consomable); // Supprime l'élément de l'inventaire
-            });
-            ligneInventaire.getChildren().addAll(new Label(consomable.getNom()), consommerButton);
-            containerInventaire.getChildren().add(ligneInventaire);
-        }
+
+        inventaireListView.setCellFactory(param -> new ListCell<>() {
+            private final Button consommerButton = new Button("Consommer");
+
+            {
+                consommerButton.setOnAction(event -> {
+                    Consomable consomable = getItem();
+                    inventaireItems.remove(consomable); // Supprime l'élément de l'inventaire
+                });
+            }
+
+            @Override
+            protected void updateItem(Consomable item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    HBox ligneInventaire = new HBox(10);
+                    ligneInventaire.getChildren().addAll(new Label(item.getNom()), consommerButton);
+                    setGraphic(ligneInventaire);
+                }
+            }
+        });
 
         HBox inputBox = new HBox(10);
         inputBox.getChildren().addAll(taskField, addButton, editButton, deleteButton, validateButton);
